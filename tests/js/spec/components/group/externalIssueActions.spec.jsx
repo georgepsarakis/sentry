@@ -4,6 +4,7 @@ import {mount} from 'enzyme';
 import ExternalIssueActions, {
   SentryAppExternalIssueActions,
 } from 'app/components/group/externalIssueActions';
+import {selectByValue} from '../../../helpers/select';
 
 describe('ExternalIssueActions', function() {
   const group = TestStubs.Group();
@@ -122,6 +123,10 @@ describe('SentryAppExternalIssueActions', () => {
       );
     });
 
+    it('renders the add icon', () => {
+      expect(wrapper.find('AddRemoveIcon').prop('isLinked')).toBe(false);
+    });
+
     it('opens the modal', () => {
       wrapper.find('IntegrationLink a').simulate('click');
       expect(
@@ -163,6 +168,62 @@ describe('SentryAppExternalIssueActions', () => {
         expect(wrapper.exists(`SentryAppExternalIssueForm #${field.name}`)).toBe(true);
       });
     });
+
+    it('links to an existing Issue', () => {
+      const request = MockApiClient.addMockResponse({
+        url: `/sentry-app-installations/${install.uuid}/external-issues/`,
+        method: 'POST',
+        body: externalIssue,
+      });
+
+      wrapper.find('IntegrationLink a').simulate('click');
+
+      wrapper.find('NavTabs li.link a').simulate('click');
+
+      wrapper.find('Input#issue').simulate('change', {target: {value: '99'}});
+
+      wrapper.find('Form form').simulate('submit');
+
+      expect(request).toHaveBeenCalledWith(
+        `/sentry-app-installations/${install.uuid}/external-issues/`,
+        expect.objectContaining({
+          data: expect.objectContaining({
+            action: 'link',
+            issue: '99',
+            groupId: group.id,
+          }),
+        })
+      );
+    });
+
+    it('creates a new Issue', () => {
+      const request = MockApiClient.addMockResponse({
+        url: `/sentry-app-installations/${install.uuid}/external-issues/`,
+        method: 'POST',
+        body: externalIssue,
+      });
+
+      wrapper.find('IntegrationLink a').simulate('click');
+      wrapper.find('NavTabs li.create a').simulate('click');
+
+      wrapper.find('Input#title').simulate('change', {target: {value: 'foo'}});
+      wrapper.find('TextArea#description').simulate('change', {target: {value: 'bar'}});
+      selectByValue(wrapper, 1, {name: 'numbers'});
+
+      wrapper.find('Form form').simulate('submit');
+
+      expect(request).toHaveBeenCalledWith(
+        `/sentry-app-installations/${install.uuid}/external-issues/`,
+        expect.objectContaining({
+          data: expect.objectContaining({
+            action: 'create',
+            title: 'foo',
+            description: 'bar',
+            groupId: group.id,
+          }),
+        })
+      );
+    });
   });
 
   describe('with an external issue linked', () => {
@@ -189,6 +250,22 @@ describe('SentryAppExternalIssueActions', () => {
           .first()
           .prop('href')
       ).toEqual(externalIssue.webUrl);
+    });
+
+    it('renders the remove issue button', () => {
+      expect(wrapper.find('AddRemoveIcon').prop('isLinked')).toBe(true);
+    });
+
+    it('deletes a Linked Issue', () => {
+      const request = MockApiClient.addMockResponse({
+        url: `/issues/${group.id}/external-issues/${externalIssue.id}/`,
+        method: 'DELETE',
+      });
+
+      wrapper.find('AddRemoveIcon').simulate('click');
+
+      expect(wrapper.find('AddRemoveIcon').prop('isLinked')).toBe(false);
+      expect(request).toHaveBeenCalled();
     });
   });
 });
