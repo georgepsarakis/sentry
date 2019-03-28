@@ -67,7 +67,6 @@ def up(project, exclude):
     configure()
 
     from django.conf import settings
-    from sentry import options as sentry_options
 
     import docker
     client = get_docker_client()
@@ -98,7 +97,7 @@ def up(project, exclude):
             fg='cyan')
         exclude |= {'kafka', 'zookeeper', 'snuba', 'clickhouse'}
 
-    if not sentry_options.get('symbolicator.enabled'):
+    if not settings.SENTRY_SYMBOLICATOR_ENABLED:
         exclude |= 'symbolicator'
 
     get_or_create(client, 'network', project)

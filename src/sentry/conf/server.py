@@ -1535,6 +1535,11 @@ SENTRY_MINIDUMP_CACHE = False
 # The location for cached minidumps
 SENTRY_MINIDUMP_PATH = '/tmp/minidump'
 
+# Toggles whether the native stacktrace symbolicator should be used
+SENTRY_SYMBOLICATOR_ENABLED = False
+# URL of the native stacktrace symbolicator
+SENTRY_SYMBOLICATOR_URL = 'http://127.0.0.1:3021'
+
 # Relay
 # List of PKs whitelisted by Sentry.  All relays here are always
 # registered as internal relays.

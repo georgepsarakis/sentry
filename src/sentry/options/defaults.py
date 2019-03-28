@@ -113,14 +113,6 @@ register(
     flags=FLAG_ALLOW_EMPTY | FLAG_PRIORITIZE_DISK
 )
 
-# Symbolicator
-register('symbolicator.enabled', default=False, flags=FLAG_ALLOW_EMPTY | FLAG_PRIORITIZE_DISK)
-register(
-    'symbolicator.options',
-    default={'url': 'http://127.0.0.1:3021'},
-    flags=FLAG_ALLOW_EMPTY | FLAG_PRIORITIZE_DISK,
-)
-
 # Analytics
 register('analytics.backend', default='noop', flags=FLAG_NOSTORE)
 register('analytics.options', default={}, flags=FLAG_NOSTORE)
